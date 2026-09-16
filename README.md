@@ -1,113 +1,54 @@
-# Flynn Discovery
+# Flynn plugin discovery
 
-A cluster peer discovery server.
+[![coverage](.github/badges/coverage.svg)](https://github.com/randy-girard/flynn-discovery/actions/workflows/ci.yml)
 
-`flynn-discovery` provides a simple HTTP interface to create clusters, register cluster members and get cluster members.
+Cluster peer-discovery API for Flynn (`kind: app`). This is a Flynn plugin,
+not a Docker Compose project: install it with **`flynn-host plugin install`**.
 
-To get `flynn-discovery` run (requires a correctly configured Go environment):
+The hosted service at `discovery.flynn.cloud.randygirard.com` is still the
+default for `flynn-host init --init-discovery`. Use this plugin when you want
+that same HTTP API **on your cluster**, typically after a single-node
+bootstrap, so extra nodes can join without the cloud discovery server.
 
-```
-$ go get github.com/flynn/flynn-discovery
-```
-
-To deploy `flynn-discovery` into a Flynn cluster execute the following steps:
-
-```
-$ cd $GOPATH/src/github.com/flynn/flynn-discovery
-$ flynn create flynn-discovery
-$ flynn resource add postgres
-$ cat schema.sql | flynn pg psql --
-$ git push flynn master
+```text
+sudo flynn-host plugin install discovery
+sudo flynn-host plugin install ../flynn-discovery
+sudo flynn-host plugin install https://github.com/randy-girard/flynn-discovery.git
+sudo flynn-host plugin uninstall discovery
 ```
 
-At this point you should have a deployed version of `flynn-discovery` running on your Flynn cluster.
+Install attaches postgres, deploys the app, and adds
+`https://discovery.${CLUSTER_DOMAIN}`. After the wait URL is up, `hooks.ready`
+registers this host and prints the join token (also written to
+`/etc/flynn/discovery-token`). This is a system app: it does not add a
+`flynn discovery` command.
 
-To see the address run `flynn route`:
+On additional nodes (Flynn installed, not yet started):
 
-```
-$ flynn route
-ROUTE                                    SERVICE              ID                                         STICKY
-http:flynn-discovery.dev.localflynn.com  flynn-discovery-web  http/5bb8495e-a660-430d-baa3-4995972ab020  false
-```
-
-Export that URL to use in tests:
-
-```
-$ export FLYNN_DISCOVERY_URL=$(flynn route | sed 1d | cut -f 1 -d " " | sed 's/^http://')
+```text
+sudo flynn-host init --discovery "$(cat /etc/flynn/discovery-token)"
+sudo systemctl start flynn-host
 ```
 
-Now we can test `flynn-discovery`.
+Copy the token from the first node. `DISCOVERY_SERVER=https://discovery.${CLUSTER_DOMAIN} flynn-host init --init-discovery` against this plugin reuses the same cluster token.
 
-First we need to create a cluster token. This will uniquely identify the cluster. The normal workflow is to create the cluster token beforehand and give it to each cluster member so they can register themselves as members of that cluster.
+## Layout
 
-```
-$ curl -XPOST $FLYNN_DISCOVERY_URL/clusters -I
-HTTP/1.1 201 Created
-Location: /clusters/e99a6a09-bc2b-4dbb-b84e-c70ae176be48
-Date: Thu, 26 Nov 2015 12:26:54 GMT
-Content-Length: 0
-Content-Type: text/plain; charset=utf-8
-```
-
-If the token was created successfully we should get a `201 Created` response status. The `Location` header is the (relative) URL representing the cluster token.
-
-The cluster token is `http://$FLYNN_DISCOVERY_URL/clusters/e99a6a09-bc2b-4dbb-b84e-c70ae176be48`.
-
-Next we can add cluster members by using the provided cluster token:
-
-```
-$ curl -XPOST $FLYNN_DISCOVERY_URL/clusters/e99a6a09-bc2b-4dbb-b84e-c70ae176be48/instances -d '
-{
-  "data": {
-    "name": "instance-2",
-    "url": "http://localhost:3333"
-  }
-}
-'
-{"data":{"id":"66b52ea9-50b9-41ab-842e-72643b833400","cluster_id":"e99a6a09-bc2b-4dbb-b84e-c70ae176be48","url":"http://localhost:2222","name":"instance-1","created_at":"2015-11-26T12:24:32.580008Z"}}v
+```text
+flynn-plugin.json     Install contract (postgres, HTTP route, wait, hooks)
+cmd/discovery/        HTTP API (same /clusters contract flynn-host already uses)
+internal/server/      net/http handlers
+internal/store/       memory (tests) and postgres
+migrations/           schema
+script/plugin-build   Squashfs image for GitHub Releases
+script/install.sh     Log the public URL
+script/ready.sh       Mint token + register this flynn-host after wait
+script/uninstall.sh   Remove /etc/flynn/discovery-token
+.github/workflows/    CI (coverage badge) and Build and Release
 ```
 
-Add another cluster member:
+## Develop
 
-```
-$ curl -XPOST $FLYNN_DISCOVERY_URL/clusters/e99a6a09-bc2b-4dbb-b84e-c70ae176be48/instances -d '
-> {
->   "data": {
->     "name": "instance-2",
->     "url": "http://localhost:3333"
->   }
-> }
-> '
-{"data":{"id":"b4b84b79-4ba5-4847-9827-41616e0db056","cluster_id":"e99a6a09-bc2b-4dbb-b84e-c70ae176be48","url":"http://localhost:3333","name":"instance-2","created_at":"2015-11-26T12:25:25.745206Z"}}
-```
-
-List all the cluster members:
-
-```
-$ curl $FLYNN_DISCOVERY_URL/clusters/e99a6a09-bc2b-4dbb-b84e-c70ae176be48/instances
-{"data":[{"id":"66b52ea9-50b9-41ab-842e-72643b833400","cluster_id":"e99a6a09-bc2b-4dbb-b84e-c70ae176be48","url":"http://localhost:2222","name":"instance-1","created_at":"2015-11-26T12:24:32.580008Z"},{"id":"b4b84b79-4ba5-4847-9827-41616e0db056","cluster_id":"e99a6a09-bc2b-4dbb-b84e-c70ae176be48","url":"http://localhost:3333","name":"instance-2","created_at":"2015-11-26T12:25:25.745206Z"}]}
-```
-
-Or pretty printed:
-
-```
-$ curl -sS $FLYNN_DISCOVERY_URL/clusters/e99a6a09-bc2b-4dbb-b84e-c70ae176be48/instances | json_pp
-{
-   "data" : [
-      {
-         "url" : "http://localhost:2222",
-         "id" : "66b52ea9-50b9-41ab-842e-72643b833400",
-         "name" : "instance-1",
-         "cluster_id" : "e99a6a09-bc2b-4dbb-b84e-c70ae176be48",
-         "created_at" : "2015-11-26T12:24:32.580008Z"
-      },
-      {
-         "cluster_id" : "e99a6a09-bc2b-4dbb-b84e-c70ae176be48",
-         "created_at" : "2015-11-26T12:25:25.745206Z",
-         "url" : "http://localhost:3333",
-         "name" : "instance-2",
-         "id" : "b4b84b79-4ba5-4847-9827-41616e0db056"
-      }
-   ]
-}
+```text
+./script/run-unit-tests
 ```

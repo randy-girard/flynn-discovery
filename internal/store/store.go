@@ -1,9 +1,11 @@
-package main
+package store
 
 import (
 	"errors"
 	"time"
 )
+
+var ErrExists = errors.New("object exists")
 
 type Cluster struct {
 	ID               string
@@ -28,10 +30,11 @@ type SSHPublicKey struct {
 	Data []byte `json:"data"`
 }
 
-var ErrExists = errors.New("object exists")
-
-type StorageBackend interface {
+// Backend is the discovery API store. Memory is used in tests; Postgres is
+// used when the plugin is installed (DATABASE_URL).
+type Backend interface {
 	CreateCluster(*Cluster) error
-	CreateInstance(instance *Instance) error
+	DefaultCluster() (*Cluster, error)
+	CreateInstance(*Instance) error
 	GetClusterInstances(clusterID string) ([]*Instance, error)
 }

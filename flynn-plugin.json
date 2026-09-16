@@ -1,0 +1,72 @@
+{
+  "name": "discovery",
+  "kind": "app",
+  "github_repo": "randy-girard/flynn-discovery",
+  "app": {
+    "name": "discovery",
+    "meta": {
+      "flynn-system-app": "true",
+      "flynn-plugin": "true"
+    },
+    "processes": {
+      "web": {
+        "args": ["/bin/start-flynn-discovery"],
+        "ports": [
+          {
+            "port": 80,
+            "proto": "tcp",
+            "service": {
+              "name": "discovery",
+              "create": true,
+              "check": {"type": "http", "path": "/.well-known/status"}
+            }
+          }
+        ],
+        "service": "discovery"
+      }
+    }
+  },
+  "inject_env": [
+    "SINGLETON",
+    "CLUSTER_DOMAIN",
+    "DEFAULT_ROUTE_DOMAIN"
+  ],
+  "env": {
+    "URL": "https://discovery.${CLUSTER_DOMAIN}",
+    "DOMAIN": "discovery.${CLUSTER_DOMAIN}",
+    "PORT": "80"
+  },
+  "resources": ["postgres"],
+  "routes": [
+    {
+      "type": "http",
+      "domain": "discovery.${CLUSTER_DOMAIN}",
+      "service": "discovery",
+      "auto_tls": true
+    }
+  ],
+  "wait": "http://discovery.discoverd/.well-known/status",
+  "hooks": {
+    "install": "script/install.sh",
+    "uninstall": "script/uninstall.sh",
+    "ready": "script/ready.sh"
+  },
+  "build": {
+    "base": {
+      "repo": "randy-girard/flynn",
+      "version": "latest",
+      "image": "ubuntu-noble"
+    },
+    "entrypoint": ["/bin/start-flynn-discovery"],
+    "packages": "img/packages.sh",
+    "go": {
+      "./cmd/discovery": "/bin/discovery"
+    },
+    "copy": {
+      "start.sh": "/bin/start-flynn-discovery"
+    }
+  },
+  "artifacts": {
+    "image": ""
+  }
+}
