@@ -5,10 +5,11 @@
 Cluster peer-discovery API for Flynn (`kind: app`). This is a Flynn plugin,
 not a Docker Compose project: install it with **`flynn-host plugin install`**.
 
-The hosted service at `discovery.flynn.cloud.randygirard.com` is still the
-default for `flynn-host init --init-discovery`. Use this plugin when you want
-that same HTTP API **on your cluster**, typically after a single-node
-bootstrap, so extra nodes can join without the cloud discovery server.
+There is no public hosted discovery service. Use this plugin when you want
+the same HTTP `/clusters` API **on your cluster**, typically after a
+single-node bootstrap, so extra nodes can join without a separate discovery
+host. `flynn-host init --init-discovery` also works against any compatible
+API when you set `DISCOVERY_SERVER` (for example `https://discovery.example.com`).
 
 ```text
 sudo flynn-host plugin install discovery
