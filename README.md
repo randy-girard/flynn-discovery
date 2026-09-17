@@ -1,6 +1,6 @@
 # Flynn plugin discovery
 
-[![coverage](.github/badges/coverage.svg)](https://github.com/randy-girard/flynn-discovery/actions/workflows/ci.yml)
+[![coverage](.github/badges/coverage.svg)](https://github.com/randy-girard/flynn-plugin-discovery/actions/workflows/ci.yml)
 
 Cluster peer-discovery API for Flynn (`kind: app`). This is a Flynn plugin,
 not a Docker Compose project: install it with **`flynn-host plugin install`**.
@@ -12,8 +12,8 @@ bootstrap, so extra nodes can join without the cloud discovery server.
 
 ```text
 sudo flynn-host plugin install discovery
-sudo flynn-host plugin install ../flynn-discovery
-sudo flynn-host plugin install https://github.com/randy-girard/flynn-discovery.git
+sudo flynn-host plugin install ../flynn-plugin-discovery
+sudo flynn-host plugin install https://github.com/randy-girard/flynn-plugin-discovery.git
 sudo flynn-host plugin uninstall discovery
 ```
 

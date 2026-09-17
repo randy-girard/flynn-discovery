@@ -1,4 +1,4 @@
-module github.com/randy-girard/flynn-discovery
+module github.com/randy-girard/flynn-plugin-discovery
 
 go 1.24.0
 

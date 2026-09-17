@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/randy-girard/flynn-discovery/internal/server"
-	"github.com/randy-girard/flynn-discovery/internal/store"
+	"github.com/randy-girard/flynn-plugin-discovery/internal/server"
+	"github.com/randy-girard/flynn-plugin-discovery/internal/store"
 )
 
 func main() {
@@ -25,6 +25,6 @@ func main() {
 	if _, err := srv.EnsureDefaultCluster(); err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("flynn-discovery listening on :%s url=%s", port, os.Getenv("URL"))
+	log.Printf("flynn-plugin-discovery listening on :%s url=%s", port, os.Getenv("URL"))
 	log.Fatal(http.ListenAndServe(":"+port, srv))
 }

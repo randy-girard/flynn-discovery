@@ -15,7 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/randy-girard/flynn-discovery/migrations"
+	"github.com/randy-girard/flynn-plugin-discovery/migrations"
 )
 
 type Postgres struct {

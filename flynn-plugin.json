@@ -1,7 +1,7 @@
 {
   "name": "discovery",
   "kind": "app",
-  "github_repo": "randy-girard/flynn-discovery",
+  "github_repo": "randy-girard/flynn-plugin-discovery",
   "app": {
     "name": "discovery",
     "meta": {

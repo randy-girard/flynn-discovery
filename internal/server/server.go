@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/randy-girard/flynn-discovery/internal/store"
+	"github.com/randy-girard/flynn-plugin-discovery/internal/store"
 )
 
 type Server struct {
@@ -46,7 +46,7 @@ func (s *Server) EnsureDefaultCluster() (*store.Cluster, error) {
 	if c != nil {
 		return c, nil
 	}
-	c = &store.Cluster{CreatorUserAgent: "flynn-discovery"}
+	c = &store.Cluster{CreatorUserAgent: "flynn-plugin-discovery"}
 	if err := s.Backend.CreateCluster(c); err != nil {
 		return nil, err
 	}

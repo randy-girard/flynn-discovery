@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/randy-girard/flynn-discovery/internal/store"
+	"github.com/randy-girard/flynn-plugin-discovery/internal/store"
 )
 
 func TestClusterURL(t *testing.T) {

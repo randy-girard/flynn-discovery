@@ -306,6 +306,33 @@ func TestRepoFlynnPluginManifestUninstallHook(t *testing.T) {
 	}
 }
 
+func TestRepoGitHubRepoIsFlynnPluginDiscovery(t *testing.T) {
+	root, err := filepath.Abs("../..")
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(filepath.Join(root, "flynn-plugin.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var m struct {
+		GitHubRepo string `json:"github_repo"`
+	}
+	if err := json.Unmarshal(raw, &m); err != nil {
+		t.Fatal(err)
+	}
+	if m.GitHubRepo != "randy-girard/flynn-plugin-discovery" {
+		t.Fatalf("github_repo=%q want randy-girard/flynn-plugin-discovery", m.GitHubRepo)
+	}
+	mod, err := os.ReadFile(filepath.Join(root, "go.mod"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(mod), "module github.com/randy-girard/flynn-plugin-discovery") {
+		t.Fatal("go.mod must use the flynn-plugin-discovery module path")
+	}
+}
+
 func TestRepoHasNoRuntimeDockerCompose(t *testing.T) {
 	root, err := filepath.Abs("../..")
 	if err != nil {
