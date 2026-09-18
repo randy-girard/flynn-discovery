@@ -12,17 +12,21 @@ host. `flynn-host init --init-discovery` also works against any compatible
 API when you set `DISCOVERY_SERVER` (for example `https://discovery.example.com`).
 
 ```text
-sudo flynn-host plugin install discovery
-sudo flynn-host plugin install ../flynn-plugin-discovery
-sudo flynn-host plugin install https://github.com/randy-girard/flynn-plugin-discovery.git
-sudo flynn-host plugin uninstall discovery
+sudo flynn-host plugin:install discovery --ref vX
+sudo flynn-host plugin:install discovery --ref vX --auto-tls
+sudo flynn-host plugin:install ../flynn-plugin-discovery
+sudo flynn-host plugin:install https://github.com/randy-girard/flynn-plugin-discovery.git --ref vX
+sudo flynn-host plugin:update discovery --ref vX
+sudo flynn-host plugin:uninstall discovery
 ```
 
 Install attaches postgres, deploys the app, and adds
 `https://discovery.${CLUSTER_DOMAIN}`. After the wait URL is up, `hooks.ready`
 registers this host and prints the join token (also written to
 `/etc/flynn/discovery-token`). This is a system app: it does not add a
-`flynn discovery` command.
+`flynn discovery` command. Operators manage routes with
+`flynn-host plugin:route discovery`. `--ref` is a published GitHub Release tag.
+`plugin:update` deploys a new release without re-running `hooks.ready`.
 
 On additional nodes (Flynn installed, not yet started):
 
@@ -78,5 +82,5 @@ Without Docker:
 Install on a real cluster is unchanged:
 
 ```text
-sudo flynn-host plugin install ../flynn-plugin-discovery
+sudo flynn-host plugin:install ../flynn-plugin-discovery
 ```
