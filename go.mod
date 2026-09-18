@@ -5,9 +5,9 @@ go 1.24.0
 toolchain go1.24.12
 
 require (
-	github.com/flynn/flynn v0.0.0-20260914140432-be1b4a311248
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
+	github.com/randy-girard/flynn v0.0.0-20260918132949-7903267f036b
 )
 
 require (
@@ -25,5 +25,3 @@ require (
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 )
-
-replace github.com/flynn/flynn => github.com/randy-girard/flynn v0.0.0-20260914140432-be1b4a311248
