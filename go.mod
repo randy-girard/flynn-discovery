@@ -7,7 +7,7 @@ toolchain go1.24.12
 require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/randy-girard/flynn v0.0.0-20260918132949-7903267f036b
+	github.com/randy-girard/flynn v0.0.0-20260918165205-684ac031d829
 )
 
 require (
