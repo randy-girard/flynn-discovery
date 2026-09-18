@@ -2,8 +2,8 @@
 
 [![coverage](.github/badges/coverage.svg)](https://github.com/randy-girard/flynn-plugin-discovery/actions/workflows/ci.yml)
 
-Cluster peer-discovery API for Flynn (`kind: app`). This is a Flynn plugin,
-not a Docker Compose project: install it with **`flynn-host plugin install`**.
+Cluster peer-discovery API for Flynn (`kind: app`). Install it with
+**`flynn-host plugin install`**, or run the HTTP API locally with Docker Compose.
 
 There is no public hosted discovery service. Use this plugin when you want
 the same HTTP `/clusters` API **on your cluster**, typically after a
@@ -41,6 +41,7 @@ cmd/discovery/        HTTP API (same /clusters contract flynn-host already uses)
 internal/server/      net/http handlers
 internal/store/       memory (tests) and postgres
 migrations/           schema
+compose.yaml          Local Postgres + Air API (not used by plugin install)
 script/plugin-build   Squashfs image for GitHub Releases
 script/install.sh     Log the public URL
 script/ready.sh       Mint token + register this flynn-host after wait
@@ -50,6 +51,32 @@ script/uninstall.sh   Remove /etc/flynn/discovery-token
 
 ## Develop
 
+Local API work does **not** need a Flynn cluster. Docker Compose runs Postgres
+and the discovery API with Air rebuilds:
+
+```text
+docker compose up --build
+```
+
+Open http://localhost:3081/.well-known/status. The `/clusters` API is on the
+same port. Postgres is published on **5433** so it does not collide with the
+dashboard Compose stack (5432).
+
+| Service | Port |
+|---------|------|
+| Discovery API | 3081 |
+| Postgres | 5433 |
+
+Edit Go or SQL files and Air restarts the API. Migrations run on process start.
+
+Without Docker:
+
 ```text
 ./script/run-unit-tests
+```
+
+Install on a real cluster is unchanged:
+
+```text
+sudo flynn-host plugin install ../flynn-plugin-discovery
 ```

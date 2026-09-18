@@ -1,0 +1,16 @@
+# Discovery Go API with Air rebuilds. Source is bind-mounted by Compose.
+FROM golang:1.24.12-bookworm
+
+WORKDIR /src
+ENV CGO_ENABLED=0
+ENV GOFLAGS="-mod=mod -buildvcs=false"
+ENV GOTOOLCHAIN=local
+ENV PATH="/go/bin:${PATH}"
+
+RUN go install github.com/air-verse/air@v1.61.7
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+CMD ["air", "-c", "dev/air.toml"]

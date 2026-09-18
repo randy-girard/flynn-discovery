@@ -1,0 +1,6 @@
+.git
+.plugin-build-cache
+coverage
+dist
+tmp
+*.squashfs

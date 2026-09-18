@@ -1,0 +1,50 @@
+# Local discovery stack: API + Postgres.
+# Plugin install is unchanged (`flynn-host plugin install`); this file is for
+# development only and is not copied into the plugin image.
+name: flynn-discovery-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: flynn
+      POSTGRES_PASSWORD: flynn
+      POSTGRES_DB: discovery
+    ports:
+      - "5433:5432"
+    volumes:
+      - discovery-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flynn -d discovery"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  discovery:
+    build:
+      context: .
+      dockerfile: dev/Dockerfile.discovery
+    working_dir: /src
+    volumes:
+      - .:/src
+      - discovery-gomod:/go/pkg/mod
+      - discovery-gocache:/root/.cache/go-build
+    environment:
+      PORT: "3081"
+      URL: http://localhost:3081
+      DOMAIN: discovery.example.local
+      CLUSTER_DOMAIN: example.local
+      DEFAULT_ROUTE_DOMAIN: example.local
+      DATABASE_URL: postgres://flynn:flynn@postgres:5432/discovery?sslmode=disable
+      GOFLAGS: "-mod=mod -buildvcs=false"
+      CGO_ENABLED: "0"
+    ports:
+      - "3081:3081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  discovery-pg:
+  discovery-gomod:
+  discovery-gocache:

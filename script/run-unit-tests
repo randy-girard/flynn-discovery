@@ -21,6 +21,8 @@ run_native() {
   fi
   echo "==> release notes"
   "${ROOT}/script/test-release-notes.sh"
+  echo "==> compose"
+  "${ROOT}/script/test-compose.sh"
   COVER_DIR="${COVERAGE_DIR:-${ROOT}/coverage}"
   mkdir -p "${COVER_DIR}"
   echo "==> go test ./..."

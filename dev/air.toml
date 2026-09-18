@@ -1,0 +1,16 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  bin = "./tmp/discovery"
+  cmd = "go build -o ./tmp/discovery ./cmd/discovery"
+  delay = 400
+  exclude_dir = ["tmp", "dist", "coverage", ".plugin-build-cache", ".git", "cmd/plugin-build"]
+  include_ext = ["go", "sql"]
+  poll = true
+  poll_interval = 1000
+  send_interrupt = true
+  kill_delay = "2s"
+
+[log]
+  time = true
