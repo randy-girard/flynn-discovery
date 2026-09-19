@@ -25,7 +25,7 @@ Install attaches postgres, deploys the app, and adds
 registers this host and prints the join token (also written to
 `/etc/flynn/discovery-token`). This is a system app: it does not add a
 `flynn discovery` command. Operators manage routes with
-`flynn-host plugin:route discovery`. `--ref` is a published GitHub Release tag.
+`flynn-host plugin:route discovery`. `--ref` is a published GitHub Release tag (`vYYYYMMDD.N.P`).
 `plugin:update` deploys a new release without re-running `hooks.ready`.
 
 On additional nodes (Flynn installed, not yet started):
